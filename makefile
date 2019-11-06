@@ -12,18 +12,22 @@ CFLAGS  = -g -Wall
 LIB = -lgmp -lm
 
 # C files
-FILES = test.c factor.c form.c arithmetic.c
-
+FILES = main.c factor.c form.c arithmetic.c
+FILES_FORM = test_form.c form.c arithmetic.c
 # headers
-HEADERS = project.h
+HEADERS = cgm.h
 
 # the build target executable:
-TARGET = project
+TARGET = cgm
 
+# build test for form
+FORM = test_form
 
 all: $(FILES) $(HEADERS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(FILES) $(LIB)
 
+form: $(FILES_FORM)
+	$(CC) $(CFLAGS) -o $(FORM) $(FILES_FORM) $(LIB)
 clean: 
 	rm -f $(TARGET)
 

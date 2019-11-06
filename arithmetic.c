@@ -3,10 +3,10 @@
 #include <gmp.h>
 #include <math.h>
 #include <time.h>
-#include "project.h"
+#include "cgm.h"
 
 // Compute square root d mod (p = q2^e) of a
-void square_root_m(mpz_t d, mpz_t a, mpz_t p, mpz_t e, mpz_t q){
+void square_root_m(mpz_t d, mpz_t a, mpz_t p, unsigned int e, mpz_t q){
 	mpz_t x,y,z,i,b,u,m,r,t,n,tmp;
 	gmp_randstate_t state;
 	mpz_inits(x,y,z,i,b,u,m,r,t,n,tmp,NULL);
@@ -26,7 +26,7 @@ void square_root_m(mpz_t d, mpz_t a, mpz_t p, mpz_t e, mpz_t q){
 		mpz_add_ui(i,i,1);
 	}
 	mpz_set(y,z);
-	mpz_set(r,e);
+	mpz_set_ui(r,e);
 	mpz_set_ui(x,1);
 	mpz_set_ui(i,0);
 	mpz_sub_ui(tmp,q,1);
@@ -107,8 +107,9 @@ void PARTEUCL(mpz_t a, mpz_t b, mpz_t v, mpz_t d, mpz_t v2, mpz_t v3, mpz_t z,mp
 			mpz_add_ui(z,z,1);
 		}
 		else{
-			mpz_and(tmp,z,one_);
-			if(mpz_cmp_ui(tmp,1) == 0){
+			//mpz_and(tmp,z,one_);
+			//if(mpz_cmp_ui(tmp,1) == 0){
+			if(mpz_congruent_ui_p (z, 1, 2)){
 				mpz_neg(v2,v2);
 				mpz_neg(v3,v3);
 			}
