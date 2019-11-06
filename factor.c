@@ -45,7 +45,7 @@ void precompute(unsigned long * T, unsigned long B1, unsigned long * D, unsigned
 			c++;
 			j++;
 			T[c] = n;
-			D[j] = (T[c]-T[c-1]);
+			D[j] = (T[c]-T[c-1])>>1;
 		}
 		n++;
 	}
@@ -129,7 +129,7 @@ int is_composite(mpz_t N, int c){
 /*testing*/
 void CGM_factor(mpz_t N, mpz_t B, int e, unsigned long * T, unsigned long * T2){
 	clock_t st;
-	unsigned int K = 1, k = T[0]; // T[0] length of T : larger B1, longer loop
+	unsigned int K = 1, k1 = T[0], k2 = T2[0]; // T[0] length of T : larger B1, longer loop
 	unsigned int flag = 0, e1, i, j, i1, p0;
 	unsigned long q;
 	mpz_t x0,x1,x2,b0,b1,b2,c0,c1,c2,d0,d1,d2,p1,D,q1,l,tmp,L;
@@ -160,6 +160,8 @@ void CGM_factor(mpz_t N, mpz_t B, int e, unsigned long * T, unsigned long * T2){
 	mpz_fdiv_q_ui(L,L,4);
 	mpz_root(L,L,4);
 	j = 1;
+
+	/* come back here to change the form for the same K */
 	loop_form:
 	j++;
 	i = 1;
@@ -171,13 +173,13 @@ void CGM_factor(mpz_t N, mpz_t B, int e, unsigned long * T, unsigned long * T2){
 	mpz_set_ui(x0,T[j]); // set x0 to a prime (D/p) = 1
 
 	rand_prime_form(x0,D,x1,x2); // ============== NEED TO OPTIMIZE ===========================
-	//gmp_printf("j=%d form x0=%Zd x1=%Zd x2=%Zd\n",j,x0,x1,x2);
+	gmp_printf("Form x0=%Zd x1=%Zd x2=%Zd\n",x0,x1,x2);
 
 	//printf("Time used %f\n", (double) (clock()-st) / CLOCKS_PER_SEC);
 	// k is the number of primes in T
 
 	/* This loop computes the power of (x0,x1,x2) */
-	while(i < k){
+	while(i < k1){
 		i++;
 		q = T[i];
 		mpz_set_ui(q1,q); 
@@ -187,47 +189,49 @@ void CGM_factor(mpz_t N, mpz_t B, int e, unsigned long * T, unsigned long * T2){
 		}
 		form_pow(x0,x1,x2,x0,x1,x2,q1,p0,p1,L);
 	}
+	//mpz_set(M,q1); add a variable M to avoid recomputation
 
-	// store (x0,x1,x2) in (c0,c1,c2)
+	/* store (x0,x1,x2) in (c0,c1,c2) */
 	mpz_set(c0,x0);
 	mpz_set(c1,x1);
 	mpz_set(c2,x2);
 	
-	/* come back here if we keep K and change the */
+	/* come back here to remove the power of 2 if we found an ambiguous form */
 	backtrack:
 	if(flag == 1){
 		mpz_set(x0,c0);
 		mpz_set(x1,c1);
 		mpz_set(x2,c2);
-		//gmp_printf("Form x0=%Zd x1=%Zd x2=%Zd\n",x0,x1,x2);
 		form_pow(x0,x1,x2,x0,x1,x2,q1,p0,p1,L);
-		//gmp_printf("Result Form q1=%Zd x0=%Zd x1=%Zd x2=%Zd\n",q1,x0,x1,x2);
 	}
+
+	/* Here we expect that (x0,x1,x2) has order 2^e. 
+	So, we compute the power 2^e1 of (x0,x1,x2) to obtain a probably ambiguous form. */
 	e1 = 0;
 	while(not_ambiguous(x0,x1,x2) && (e1 < e)){
 		NUDPL(x0,x1,x2,x0,x1,x2,L);
 		e1++;
 	}
- 	//printf("Time used for stage %d: %f\n",flag+1, (double) (clock()-st) / CLOCKS_PER_SEC);
-	//gmp_printf("Form x0=%Zd x1=%Zd x2=%Zd\n",x0,x1,x2);
-	// STAGE 2
+	
+	/* If we have not obtained an ambiguous form yet, we start stage 2. */
+
 	//printf("Time used %f\n", (double) (clock()-st) / CLOCKS_PER_SEC);
 	if(not_ambiguous(x0,x1,x2) && (flag == 0)){
 		//start = clock();
 		mpz_set(b0,x0);
 		mpz_set(b1,x1);
 		mpz_set(b2,x2);
-		//NUDPL(b0, b1, b2, b0, b1, b2, L);
-		form_pow(x0,x1,x2,x0,x1,x2,q1,p0,p1,L);
-		for(i1 = 1 ; i1 <= T2[0] ; i1++){
-			mpz_add_ui(q1,q1,T2[i1]);
-			//printf("Time used add %f\n", (double) (clock()-st) / CLOCKS_PER_SEC);
+		NUDPL(b0, b1, b2, b0, b1, b2, L);
+		/* for */
+		/* compute f^(M*q0) */
+		form_pow(x0,x1,x2,x0,x1,x2,q1,p0,p1,L); 
+		for(i1 = 1 ; i1 <= k2 ; i1++){
+			mpz_set_ui(q1,T[k1+i1]);
 			form_pow_ui(d0,d1,d2,b0,b1,b2,T2[i1],p0,p1,L);
 			//printf("Time used pow %f\n", (double) (clock()-st) / CLOCKS_PER_SEC);
 			NUCOMP(x0,x1,x2,x0,x1,x2,d0,d1,d2,L);
 			//printf("Time used mul %f\n", (double) (clock()-st) / CLOCKS_PER_SEC);
 			//gmp_printf("Form x0=%Zd x1=%Zd x2=%Zd\n",x0,x1,x2);
-			//return;
 			if(is_ambiguous(x0,x1,x2)){
 				flag = 1;
 				goto backtrack;
@@ -240,18 +244,20 @@ void CGM_factor(mpz_t N, mpz_t B, int e, unsigned long * T, unsigned long * T2){
 	}
 	flag = 0;
 
-	//TERMINATION STEP
+	/* =============== Termination step =========================
+	Check if the ambiguous form is trivial: (yes) change the form (no) retrieve the factors */
+
+	/* NEED A BIT REWRITE TO RETURN STRUCT FACTORS */
+	
 	if(is_ambiguous(x0,x1,x2)){
 		if(mpz_cmp_ui(x1,0) == 0){
 			//KN = ac
 			mpz_set_ui(tmp,K);
-			mpz_mod(tmp,tmp,x0);
-			if(mpz_cmp_ui(tmp,0) == 0){
-				//gmp_printf("Form x0=%Zd x1=%Zd x2=%Zd\n",x0,x1,x2);
-				//printf("1 Trivial decomposition for K = %d --- Go back to loop\n",K);
+			if(mpz_divisible_p (tmp, x0)){
+				/* trivial decomposition */
 				goto loop_form;
 			}else{
-				gmp_printf("K=%d N=%Zd a=%Zd b=%Zd c=%Zd\n\n",K,N,x0,x1,x2);
+				gmp_printf("a=%Zd b=%Zd c=%Zd\n\n",x0,x1,x2);
 				mpz_gcd(tmp,N,x0);
 				gmp_printf("d1 = %Zd\n",tmp);
 				mpz_gcd(tmp,N,x2);
@@ -262,35 +268,33 @@ void CGM_factor(mpz_t N, mpz_t B, int e, unsigned long * T, unsigned long * T2){
 		}else{
 			if(mpz_cmp(x0,x1) == 0){
 				mpz_mod_ui(tmp,x1,2);
-				if(mpz_cmp_ui(tmp,0) == 0){
+				if(mpz_divisible_2exp_p (x1, 1)){
 					//KN = b/2 * (2*c - b/2)
-					mpz_divexact_ui(tmp,x1,2);
+					mpz_divexact_ui(tmp,x1,2); //tmp =x1/2
 					if(mpz_cmp_ui(tmp,K) == 0){
-						//printf("2 Trivial decomposition for K = %d --- Go back to loop\n",K);
+						/* trivial decomposition : x1 = 2*K */
 						goto loop_form;
 					}else{
-						gmp_printf("K=%d N=%Zd a=%Zd b=%Zd c=%Zd\n\n",K,N,x0,x1,x2);
-						mpz_divexact_ui(tmp,x1,2);
+						gmp_printf("a=%Zd b=%Zd c=%Zd\n\n",x0,x1,x2);
 						mpz_gcd(tmp,N,tmp);
 						gmp_printf("d1 = %Zd\n",tmp);
-						mpz_mul_ui(tmp,x2,4);
-						mpz_sub(tmp,tmp,x1);
-						mpz_divexact_ui(tmp,tmp,2);
+						mpz_mul_2exp(x1,x2,1);
+						mpz_sub(tmp,x1,tmp);
 						mpz_gcd(tmp,N,tmp);
 						gmp_printf("d2 = %Zd\n",tmp);
 						mpz_clears(x0,x1,x2,b0,b1,b2,c0,c1,c2,d0,d1,d2,p1,D,q1,l,tmp,L,NULL);
 						return;
 					}
 				}else{
-				//KN = b(4*c - b);
+					/* the case KN = b(4*c - b) */
 					if(mpz_cmp_ui(x1,K) == 0){
-						//printf("3 Trivial decomposition for K = %d --- Go back to loop\n",K);
+						/* trivial decomposition x1 = K */
 						goto loop_form;
 					}else{
-						gmp_printf("K=%d N=%Zd a=%Zd b=%Zd c=%Zd\n\n",K,N,x0,x1,x2);
+						gmp_printf("a=%Zd b=%Zd c=%Zd\n\n",x0,x1,x2);
 						mpz_gcd(tmp,N,x1);
 						gmp_printf("d1 = %Zd\n",tmp);
-						mpz_mul_ui(tmp,x2,4);
+						mpz_mul_2exp(tmp,x2,2);
 						mpz_sub(tmp,tmp,x1);
 						mpz_gcd(tmp,N,tmp);
 						gmp_printf("d2 = %Zd\n",tmp);
@@ -299,46 +303,38 @@ void CGM_factor(mpz_t N, mpz_t B, int e, unsigned long * T, unsigned long * T2){
 					}
 				}
 			}else{
-				mpz_mod_ui(tmp,x1,2);
-				if(mpz_cmp_ui(tmp,0) == 0){
+				if(mpz_divisible_2exp_p (x1, 1)){
 					//KN = (b/2+a)(a-b/2);
-					mpz_divexact_ui(tmp,x1,2);
-					mpz_sub(tmp,x0,tmp);
-					if(mpz_cmp_ui(tmp,K) == 0){
-						//printf("4 Trivial decomposition for K = %d --- Go back to loop\n",K);
+					mpz_fdiv_q_2exp(tmp,x1,1);
+					if(mpz_cmp(tmp,x0) == 0){
+						/* trivial decomposition x1 = 2*x0 */
 						goto loop_form;
 					}else{
-						gmp_printf("K=%d N=%Zd a=%Zd b=%Zd c=%Zd\n\n",K,N,x0,x1,x2);
-						mpz_mul_ui(tmp,x0,2);
-						mpz_add(tmp,tmp,x1);
-						mpz_divexact_ui(tmp,tmp,2);
-						mpz_gcd(tmp,N,tmp);
-						gmp_printf("d1 = %Zd\n",tmp);
-						mpz_mul_ui(tmp,x0,2);
-						mpz_sub(tmp,tmp,x1);
-						mpz_divexact_ui(tmp,tmp,2);
-						mpz_gcd(tmp,N,tmp);
-						gmp_printf("d2 = %Zd\n",tmp);
+						gmp_printf("a=%Zd b=%Zd c=%Zd\n\n",x0,x1,x2);
+						mpz_sub(x1,x0,tmp);
+						mpz_gcd(x1,N,x1);
+						gmp_printf("d2 = %Zd\n",x1);
+						mpz_add(x1,x0,tmp);
+						mpz_gcd(x1,N,x1);
+						gmp_printf("d1 = %Zd\n",x1);					
 						mpz_clears(x0,x1,x2,b0,b1,b2,c0,c1,c2,d0,d1,d2,p1,D,q1,l,tmp,L,NULL);
 						return;
 					}
 				}else{
-				//KN = (b+2a)(2a-b);
-					mpz_mul_ui(tmp,x0,2);
+					/* the case KN = (b+2a)(2a-b) */
+					mpz_mul_2exp (tmp, x0, 1);
 					mpz_sub(tmp,tmp,x1);
 					if(mpz_cmp_ui(tmp,K) == 0){
-						//printf("5 Trivial decomposition for K = %d --- Go back to loop\n",K);
+						/* trivial decomposition 2*x0-x1 = K */
 						goto loop_form;
 					}else{
-						gmp_printf("K=%d N=%Zd a=%Zd b=%Zd c=%Zd\n\n",K,N,x0,x1,x2);
-						mpz_mul_ui(tmp,x0,2);
+						gmp_printf("a=%Zd b=%Zd c=%Zd\n\n",K,N,x0,x1,x2);
+						mpz_gcd(tmp,N,tmp);
+						gmp_printf("d2 = %Zd\n",tmp);
+						mpz_mul_2exp (tmp, x0, 1);
 						mpz_add(tmp,tmp,x1);
 						mpz_gcd(tmp,N,tmp);
 						gmp_printf("d1 = %Zd\n",tmp);
-						mpz_mul_ui(tmp,x0,2);
-						mpz_sub(tmp,tmp,x1);
-						mpz_gcd(tmp,N,tmp);
-						gmp_printf("d2 = %Zd\n",tmp);
 						mpz_clears(x0,x1,x2,b0,b1,b2,c0,c1,c2,d0,d1,d2,p1,D,q1,l,tmp,L,NULL);
 						return;
 					}
