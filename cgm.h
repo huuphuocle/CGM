@@ -1,4 +1,5 @@
 /* libs */
+#include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
 #include <math.h>
@@ -14,10 +15,10 @@ struct factor{
 typedef struct factor * factor_t;
 
 struct qform{
-    mpz_t a, b, c;
+    mpz_t * a, * b, * c;
 }; /* quadratic form (a,b,c) */
 
-typedef struct qform qform_t;
+typedef struct qform * qform_t;
 
 /* arithmetic.c */
 

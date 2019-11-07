@@ -1,8 +1,35 @@
-#include <stdio.h>
 #include "cgm.h"
 
+/* Constructor */
+qform_t qform_init(mpz_t a, mpz_t b, mpz_t c){
+	qform_t q = malloc(sizeof(struct qform));
+	mpz_set(* (q->a), a);
+	mpz_set(* (q->b), b);
+	mpz_set(* (q->c), c);
+	return q;
+}
+
+/* Clear memory */
+void qform_clear(qform_t q){
+	mpz_clear(*(q->a));
+	mpz_clear(*(q->b));
+	mpz_clear(*(q->c));
+	free(q);
+	return;
+}
+
 /* Discriminant of (a,b,c) */
-void discrim(mpz_t D, mpz_t a, mpz_t b, mpz_t c){
+void discrim(mpz_t D, qform_t q){
+	mpz_t tmp;
+	mpz_init(tmp);
+	mpz_mul(D,*(q->b),*(q->b));
+	mpz_mul(tmp,*(q->a),*(q->c));
+	mpz_mul_2exp(tmp,tmp,2);
+	mpz_sub(D,D,tmp);
+	mpz_clear(tmp);
+	return;
+}
+/* void discrim(mpz_t D, mpz_t a, mpz_t b, mpz_t c){
 	mpz_t tmp;
 	mpz_init(tmp);
 	mpz_mul(D,b,b);
@@ -11,7 +38,7 @@ void discrim(mpz_t D, mpz_t a, mpz_t b, mpz_t c){
 	mpz_sub(D,D,tmp);
 	mpz_clear(tmp);
 	return;
-}
+} */
 /* Lagrange's reduction of the form (a,b,c) */
 void reduction(mpz_t a, mpz_t b, mpz_t c)
 {
