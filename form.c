@@ -1,8 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <gmp.h>
-#include <math.h>
-#include <time.h>
 #include "cgm.h"
 
 // Lagrange's reduction of the form (a,b,c)
@@ -72,8 +67,7 @@ void reduction(mpz_t a, mpz_t b, mpz_t c)
 	return;
 }
 
-// Generates a prime form of discriminant D
-// NEED TO OPTIMIZE SQUARE_ROOT_M
+/* Generates a prime form of discriminant D */
 void rand_prime_form(mpz_t p, mpz_t D, mpz_t b, mpz_t c)
 {	
 	mpz_t q, tmp;

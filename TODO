@@ -1,7 +1,8 @@
-Optimize square_root_modp
 random k
 Optimize form_pow
 Optimize Miller-Rabin (slower than GMP)
 Change B1 to optimal value
 
 WHAT MATTERS THE MOST IS TO CHOOSE A GOOD B1 and B2
+
+FUNCTIONS IN ARITHMETIC.C ARE OK NOW

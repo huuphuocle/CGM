@@ -1,8 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <gmp.h>
-#include <math.h>
-#include <time.h>
 #include <string.h>
 #include "cgm.h"
 
@@ -11,7 +7,8 @@ int main(int argc, char * argv[]){
 		return 0;
 	}
 	setbuf(stdout, NULL);
-	
+	srand((unsigned) time(NULL));
+
 	char * filename = argv[1];
 	FILE * fp;
 	fp = fopen(filename, "r");
@@ -45,6 +42,11 @@ int main(int argc, char * argv[]){
 	// precompute primes up to limit and  
 	precompute(primes,B1,differences,B2);
 	printf("====================================================\n\n\n");
+
+	gmp_randstate_t state;
+	gmp_randinit_mt(state);
+	gmp_randseed_ui(state,time(NULL));
+
 	//printf("%lu \n", differences[1]);
 	mpz_t N,B;
 	mpz_inits(N,B,NULL);
@@ -53,6 +55,7 @@ int main(int argc, char * argv[]){
 		factor(input[i],B,e,primes,differences,ntrials);
 	}
 	mpz_clears(N,B,NULL);
+	gmp_randclear(state);
 	free(primes);
 	free(differences);
 	

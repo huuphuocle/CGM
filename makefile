@@ -9,7 +9,7 @@ CFLAGS  = -g -Wall
 # library flags:
 #	-lgmp	gmp.h
 #	-lm 	math.h
-LIB = -lgmp -lm
+LIB = -lflint -lgmp -lm
 
 # C files
 FILES = main.c factor.c form.c arithmetic.c

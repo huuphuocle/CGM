@@ -1,15 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <gmp.h>
-#include <math.h>
-#include <time.h>
 #include "cgm.h"
-
-struct factor{
-	mpz_t d;
-	int e;
-};
-typedef struct factor * factor_t; 
 
 //Precompute an array T of primes less than limit, T[0] is the number of primes
 void precompute(unsigned long * T, unsigned long B1, unsigned long * D, unsigned long B2){
@@ -79,29 +69,34 @@ void trial_division(mpz_t N, unsigned long * primes){
 	return;
 }
 
-//Compositeness test using Rabin-Miller test: return 1 if N is composite, 0 if N is probably prime
-// Improve this
+/* Rabin-Miller test : return 1 if N is composite, 0 if N is probably prime */
 int is_composite(mpz_t N, int c){
-	clock_t st = clock();
+
 	mpz_t q,a,b,t,e,tmp;
 	mpz_inits(q,a,b,t,e,tmp,NULL);
+	
+	/*
 	gmp_randstate_t state;
 	gmp_randinit_mt(state);
-	gmp_randseed_ui(state,time(NULL));
+	gmp_randseed_ui(state,time(NULL)); */
 
-	mpz_sub_ui(q,N,1);
+	mpz_sub_ui(q,N,1); /* q = N-1 */
 	mpz_set_ui(t,0);
-	mpz_mod_ui(tmp,q,2);
-	while(mpz_cmp_ui(tmp,0) == 0){
-		mpz_divexact_ui(q,q,2);
+
+	while(mpz_divisible_2exp_p(q, 1)){
+		mpz_fdiv_q_2exp (q, q, 1);
 		mpz_add_ui(t,t,1);
-		mpz_mod_ui(tmp,q,2);
 	}
 	mpz_sub_ui(t,t,1);
+	
 	while(c > 0){
 		mpz_sub_ui(tmp,N,3);
-		mpz_urandomm(a,state,tmp);
-		mpz_add_ui(a,a,2);
+		
+		/* mpz_urandomm(a,state,tmp); */
+		mpz_set_ui(a,rand());
+		mpz_mod(a, a,tmp);
+
+		mpz_add_ui(a,a,2); // a = a+2
 		mpz_sub_ui(tmp,N,1);
 
 		mpz_set_ui(e,0);
@@ -113,20 +108,18 @@ int is_composite(mpz_t N, int c){
 			}
 			if(mpz_cmp(b,tmp) != 0){
 				mpz_clears(q,a,b,t,e,tmp,NULL);
-				gmp_randclear(state);
+				//gmp_randclear(state);
 				return 1;
 			}
 		}
 		c = c-1;
 	}
 	mpz_clears(q,a,b,t,e,tmp,NULL);
-	gmp_randclear(state);
-	printf("Miller-Rabin : %f \n\n", (double) (clock()-st)/CLOCKS_PER_SEC);
+	//gmp_randclear(state);
 	return 0;
 }
 
-//Split N, using the bound B, e = lg(B), T is the table of primes up to B
-/*testing*/
+/* Split N, using the bound B, e = lg(B), T is the table of primes up to B */
 void CGM_factor(mpz_t N, mpz_t B, int e, unsigned long * T, unsigned long * T2){
 	clock_t st;
 	unsigned int K = 1, k1 = T[0], k2 = T2[0]; // T[0] length of T : larger B1, longer loop
@@ -347,13 +340,14 @@ void CGM_factor(mpz_t N, mpz_t B, int e, unsigned long * T, unsigned long * T2){
 	return;
 }
 
+/* User function : find a non-trivial big factor of N */
 void factor(mpz_t N, mpz_t B, int e, unsigned long *primes, unsigned long *differences, int ntrials){
 	printf("====================================================\n");
 	gmp_printf("Factoring %Zd \n\n", N);
 	trial_division(N,primes);
 	//printf("Time used : %f \n",(double) (clock() - st) / CLOCKS_PER_SEC);
-	if (mpz_probab_prime_p(N,ntrials) > 0){
-	//if(!is_composite(N,ntrials)){
+	//if (mpz_probab_prime_p(N,ntrials) > 0){
+	if(!is_composite(N, ntrials)){
 		return;
 	}
 	gmp_printf("CGM : %Zd\n\n",N);
