@@ -36,16 +36,27 @@ int main(int argc, char *argv[])
     mpz_mul(tmp, f2[0], f2[2]);
     mpz_mul_ui(tmp, tmp, 4);
     mpz_sub(D2, D2, tmp);
-
+    
     //if (mpz_cmp(D1, D2) == 0)
     {
         gmp_printf("Testing with forms of discriminant : %Zd\n", D1);
         printf("====================================================\n\n\n");
+        mpz_neg(D2, D1);
+	    mpz_fdiv_q_ui(D2, D2, 4);
+	    mpz_root(D2, D2, 4);
+        
         st = clock();
-        //for (i=0; i < 1; i++)
-            reduction(f1[0],f1[1],f1[2]);
+        for (i=0; i < 1000; i++){
+            //printf("here\n");
+            NUCOMP(f2[0],f2[1],f2[2],f1[0],f1[1],f1[2],f1[0],f1[1],f1[2],D2);
+        }
         printf("%f \n", (double) (clock()-st)/CLOCKS_PER_SEC);
-        gmp_printf("a1 = %Zd \t b1 = %Zd \t c1 = %Zd\n", f1[0], f1[1], f1[2]);
+        gmp_printf("a1 = %Zd \t b1 = %Zd \t c1 = %Zd\n", f2[0], f2[1], f2[2]);
+        st = clock();
+        for (i=0; i < 1000; i++)
+            NUDPL(f2[0],f2[1],f2[2],f1[0],f1[1],f1[2],D2);
+        printf("%f \n", (double) (clock()-st)/CLOCKS_PER_SEC);
+        gmp_printf("a1 = %Zd \t b1 = %Zd \t c1 = %Zd\n", f2[0], f2[1], f2[2]);
     }
     //else
     {

@@ -1,6 +1,18 @@
+#include <stdio.h>
 #include "cgm.h"
 
-// Lagrange's reduction of the form (a,b,c)
+/* Discriminant of (a,b,c) */
+void discrim(mpz_t D, mpz_t a, mpz_t b, mpz_t c){
+	mpz_t tmp;
+	mpz_init(tmp);
+	mpz_mul(D,b,b);
+	mpz_mul(tmp,a,c);
+	mpz_mul_2exp(tmp,tmp,2);
+	mpz_sub(D,D,tmp);
+	mpz_clear(tmp);
+	return;
+}
+/* Lagrange's reduction of the form (a,b,c) */
 void reduction(mpz_t a, mpz_t b, mpz_t c)
 {
 	mpz_t q, r, a2, tmp;
@@ -265,6 +277,7 @@ void NUCOMP(mpz_t res0, mpz_t res1, mpz_t res2, mpz_t a1_, mpz_t b1_, mpz_t c1_,
 		mpz_neg(A, A1);
 	}
 	PARTEUCL(a1, A, v, d, v2, v3, z, L);
+	
 	if (mpz_cmp_ui(z, 0) == 0)
 	{
 		mpz_mul(Q1, a2, v3);

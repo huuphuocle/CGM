@@ -44,17 +44,17 @@ int main(int argc, char * argv[]){
 	printf("====================================================\n\n\n");
 
 	gmp_randstate_t state;
-	gmp_randinit_mt(state);
-	gmp_randseed_ui(state,time(NULL));
+	gmp_randinit_default(state);
+	//gmp_randseed_ui(state,time(NULL));
 
 	//printf("%lu \n", differences[1]);
-	mpz_t N,B;
-	mpz_inits(N,B,NULL);
+	mpz_t B;
+	mpz_init(B);
 	mpz_set_ui(B,B1);
 	for(i = 0 ; i < l; i++){
 		factor(input[i],B,e,primes,differences,ntrials);
 	}
-	mpz_clears(N,B,NULL);
+	mpz_clear(B);
 	gmp_randclear(state);
 	free(primes);
 	free(differences);

@@ -4,13 +4,7 @@
 #include <math.h>
 #include <time.h>
 
-/* arithmetic.c */
-
-void square_root_m(mpz_t d, mpz_t a, mpz_t p, unsigned int e, mpz_t q);
-void PARTEUCL(mpz_t a, mpz_t b, mpz_t v, mpz_t d, mpz_t v2, mpz_t v3, mpz_t z,mpz_t L);
-
-/* form.c */
-
+/* struct */
 struct factor{
     mpz_t prime;
     int mult;
@@ -18,6 +12,19 @@ struct factor{
 }; /* a linked-list structure to store the factors of N */
 
 typedef struct factor * factor_t;
+
+struct qform{
+    mpz_t a, b, c;
+}; /* quadratic form (a,b,c) */
+
+typedef struct qform qform_t;
+
+/* arithmetic.c */
+
+void square_root_m(mpz_t d, mpz_t a, mpz_t p, unsigned int e, mpz_t q);
+void PARTEUCL(mpz_t a, mpz_t b, mpz_t v, mpz_t d, mpz_t v2, mpz_t v3, mpz_t z,mpz_t L);
+
+/* form.c */
 
 void reduction(mpz_t a,mpz_t b,mpz_t c);
 void rand_prime_form(mpz_t p,mpz_t D,mpz_t b,mpz_t c);
