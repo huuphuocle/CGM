@@ -40,5 +40,9 @@ void form_pow_ui(mpz_t res0_,mpz_t res1_,mpz_t res2_,mpz_t a,mpz_t b,mpz_t c,uns
 void precompute(unsigned long* T, unsigned long limit1, unsigned long* D, unsigned long limit2);
 void trial_division(mpz_t N, unsigned long * primes);
 int is_composite(mpz_t N, int ntrials);
-void CGM_factor(mpz_t N, mpz_t B, int e, unsigned long* T, unsigned long* T2);
 void factor(mpz_t N, mpz_t B, int e, unsigned long *primes, unsigned long *differences, int ntrials);
+
+/* cgm.c */
+void CGM_factor(mpz_t N, mpz_t B, int e, unsigned long* T, unsigned long* T2);
+
+/* main.c */

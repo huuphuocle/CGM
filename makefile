@@ -12,7 +12,7 @@ CFLAGS  = -g -Wall
 LIB = -lgmp -lm
 
 # C files
-FILES = main.c factor.c form.c arithmetic.c
+FILES = main.c cgm.c factor.c form.c arithmetic.c
 FILES_FORM = test_form.c form.c arithmetic.c
 # headers
 HEADERS = cgm.h

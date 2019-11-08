@@ -36,8 +36,9 @@ int main(int argc, char * argv[]){
 	printf("B1 = %lu , B2 = %lu\n", B1, B2);
 	int e = 40, ntrials = 20;
 	unsigned long *primes,*differences;
-	primes = (unsigned long *)malloc(B2 * sizeof(unsigned long));
-	differences = (unsigned long *)malloc(B2 * sizeof(unsigned long));
+	unsigned long size_array = B2/2; /* change the size of array - using PNT ln(B) */
+	primes = (unsigned long *)malloc(size_array * sizeof(unsigned long));
+	differences = (unsigned long *)malloc(size_array * sizeof(unsigned long));
 	
 	// precompute primes up to limit and  
 	precompute(primes,B1,differences,B2);
