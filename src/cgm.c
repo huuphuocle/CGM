@@ -1,6 +1,7 @@
-#include "cgm.h"
+#include "../headers/cgm.h"
 
 /* Split N, using the bound B, e = lg(B), T is the table of primes up to B */
+
 void CGM_factor(mpz_t N, mpz_t B, int e, unsigned long *T, unsigned long *T2)
 {
 	unsigned int K = 1, k1 = T[0], k2 = T2[0]; // T[0] length of T : larger B1, longer loop
@@ -120,7 +121,7 @@ backtrack:
 		NUDPL(b0, b1, b2, b0, b1, b2, L);
 
 		/* compute the power of B */
-		/*mpz_set(pow_b0[0],b0);
+		mpz_set(pow_b0[0],b0);
 		mpz_set(pow_b1[0],b1);
 		mpz_set(pow_b2[0],b2);
 
@@ -128,7 +129,7 @@ backtrack:
 			int jx = (ix<<1)+1;
 			NUDPL(pow_b0[jx],pow_b1[jx],pow_b2[jx],pow_b0[ix],pow_b1[ix],pow_b2[ix], L);
 			NUCOMP(pow_b0[jx+1],pow_b1[jx+1],pow_b2[jx+1],pow_b0[jx],pow_b1[jx],pow_b2[jx], b0, b1, b2, L);
-		}*/
+		}
 		
 		form_pow(x0, x1, x2, x0, x1, x2, q1, p0, p1, L);
 		for (i1 = 1; i1 <= k2; i1++)
@@ -172,7 +173,6 @@ backtrack:
 				gmp_printf("d1 = %Zd\n", tmp);
 				mpz_gcd(tmp, N, x2);
 				gmp_printf("d2 = %Zd\n", tmp);
-				//mpz_clears(x0, x1, x2, b0, b1, b2, c0, c1, c2, d0, d1, d2, p1, D, q1, l, tmp, L, NULL);
 				goto end_point;
 				return;
 			}
@@ -200,7 +200,6 @@ backtrack:
 						mpz_sub(tmp, x1, tmp);
 						mpz_gcd(tmp, N, tmp);
 						gmp_printf("d2 = %Zd\n", tmp);
-						//mpz_clears(x0, x1, x2, b0, b1, b2, c0, c1, c2, d0, d1, d2, p1, D, q1, l, tmp, L, NULL);
 						goto end_point;
 						return;
 					}
@@ -222,7 +221,6 @@ backtrack:
 						mpz_sub(tmp, tmp, x1);
 						mpz_gcd(tmp, N, tmp);
 						gmp_printf("d2 = %Zd\n", tmp);
-						//mpz_clears(x0, x1, x2, b0, b1, b2, c0, c1, c2, d0, d1, d2, p1, D, q1, l, tmp, L, NULL);
 						goto end_point;
 						return;
 					}
@@ -248,7 +246,6 @@ backtrack:
 						mpz_add(x1, x0, tmp);
 						mpz_gcd(x1, N, x1);
 						gmp_printf("d1 = %Zd\n", x1);
-						//mpz_clears(x0, x1, x2, b0, b1, b2, c0, c1, c2, d0, d1, d2, p1, D, q1, l, tmp, L, NULL);
 						goto end_point;
 						return;
 					}
@@ -273,7 +270,6 @@ backtrack:
 						mpz_gcd(tmp, N, tmp);
 						gmp_printf("d1 = %Zd\n", tmp);
 						goto end_point;
-						//mpz_clears(x0, x1, x2, b0, b1, b2, c0, c1, c2, d0, d1, d2, p1, D, q1, l, tmp, L, NULL);
 						return;
 					}
 				}
@@ -296,5 +292,30 @@ backtrack:
 	free(pow_b1);
 	free(pow_b2);
 
+	return;
+}
+
+/* User function : find a non-trivial big factor of N */
+
+void factor(mpz_t N, mpz_t B, int e, unsigned long *primes, unsigned long *differences, int ntrials)
+{
+	printf("====================================================\n");
+	if (mpz_cmp_ui(N, 0) == 0)
+	{
+		printf("Input is 0. Exit! \n \n");
+		return;
+	}
+	gmp_printf("Factoring %Zd \n\n", N);
+	trial_division(N, primes);
+	//printf("Time used : %f \n",(double) (clock() - st) / CLOCKS_PER_SEC);
+	//if (mpz_probab_prime_p(N,ntrials) > 0){
+	if (!is_composite(N, ntrials))
+	{
+		return;
+	}
+	gmp_printf("CGM : %Zd\n\n", N);
+	clock_t st = clock();
+	CGM_factor(N, B, e, primes, differences);
+	printf("Elapsed time: %f \n\n", (double)(clock() - st) / CLOCKS_PER_SEC);
 	return;
 }

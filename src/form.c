@@ -1,6 +1,9 @@
-#include "cgm.h"
+/* C file containing the implementation of quadratic forms */
+
+#include "../headers/cgm.h"
 
 /* Constructor */
+
 qform_t qform_init(mpz_t a, mpz_t b, mpz_t c){
 	qform_t q = malloc(sizeof(struct qform));
 	mpz_set(* (q->a), a);
@@ -10,6 +13,7 @@ qform_t qform_init(mpz_t a, mpz_t b, mpz_t c){
 }
 
 /* Clear memory */
+
 void qform_clear(qform_t q){
 	mpz_clear(*(q->a));
 	mpz_clear(*(q->b));
@@ -19,6 +23,7 @@ void qform_clear(qform_t q){
 }
 
 /* Discriminant of (a,b,c) */
+
 void discrim(mpz_t D, qform_t q){
 	mpz_t tmp;
 	mpz_init(tmp);
@@ -29,17 +34,9 @@ void discrim(mpz_t D, qform_t q){
 	mpz_clear(tmp);
 	return;
 }
-/* void discrim(mpz_t D, mpz_t a, mpz_t b, mpz_t c){
-	mpz_t tmp;
-	mpz_init(tmp);
-	mpz_mul(D,b,b);
-	mpz_mul(tmp,a,c);
-	mpz_mul_2exp(tmp,tmp,2);
-	mpz_sub(D,D,tmp);
-	mpz_clear(tmp);
-	return;
-} */
+
 /* Lagrange's reduction of the form (a,b,c) */
+
 void reduction(mpz_t a, mpz_t b, mpz_t c)
 {
 	mpz_t q, r, a2, tmp;
@@ -107,6 +104,7 @@ void reduction(mpz_t a, mpz_t b, mpz_t c)
 }
 
 /* Generates a prime form of discriminant D */
+
 void rand_prime_form(mpz_t p, mpz_t D, mpz_t b, mpz_t c)
 {	
 	mpz_t q, tmp;
@@ -132,6 +130,8 @@ void rand_prime_form(mpz_t p, mpz_t D, mpz_t b, mpz_t c)
 	return;
 }
 
+/* Test whether a quadratic form is ambiguous */
+
 int is_ambiguous(mpz_t a, mpz_t b, mpz_t c)
 {
 	if (mpz_cmp_ui(b, 0) == 0)
@@ -153,6 +153,8 @@ int not_ambiguous(mpz_t a, mpz_t b, mpz_t c)
 		return 0;
 	return 1;
 }
+
+/* NUDPL : Double a quadratic form */
 
 void NUDPL(mpz_t res0, mpz_t res1, mpz_t res2, mpz_t a_, mpz_t b_, mpz_t c_, mpz_t L)
 {
@@ -232,6 +234,8 @@ void NUDPL(mpz_t res0, mpz_t res1, mpz_t res2, mpz_t a_, mpz_t b_, mpz_t c_, mpz
 	mpz_clears(a, b, c, a2, b2, c2, A, B, C, C1, u, v, d1, d, v2, v3, z, e, g, tmp, NULL);
 	return;
 }
+
+/* NUCOMP : Add two quadratic forms */
 
 void NUCOMP(mpz_t res0, mpz_t res1, mpz_t res2, mpz_t a1_, mpz_t b1_, mpz_t c1_, mpz_t a2_, mpz_t b2_, mpz_t c2_, mpz_t L)
 {
@@ -358,8 +362,10 @@ void NUCOMP(mpz_t res0, mpz_t res1, mpz_t res2, mpz_t a1_, mpz_t b1_, mpz_t c1_,
 	return;
 }
 
-// Compute the power f^e = (res0,res1,res2) of f = (a,b,c)
-// (1,p0,p1) is the principal form to start with
+/* Compute the e-th power of a quadratic form 
+Input : f = (a,b,c) ; Output : f^e = (res0,res1,res2) ;
+(1,p0,p1) is the principal form of the same discriminant */
+
 void form_pow(mpz_t res0_, mpz_t res1_, mpz_t res2_, mpz_t a, mpz_t b, mpz_t c, mpz_t e_, unsigned int p0, mpz_t p1, mpz_t L)
 {
 	mpz_t res0, res1, res2, f0, f1, f2, e;
@@ -389,14 +395,19 @@ void form_pow(mpz_t res0_, mpz_t res1_, mpz_t res2_, mpz_t a, mpz_t b, mpz_t c, 
 	return;
 }
 
-// Compute the power f^e = (res0,res1,res2) of f = (a,b,c) for e an unsigned int
-void form_pow_ui(mpz_t res0_, mpz_t res1_, mpz_t res2_, mpz_t a, mpz_t b, mpz_t c, unsigned long long e, unsigned int p0, mpz_t p1, mpz_t L)
+/* Compute the e-th power of a quadratic form with an unsigned int e */
+
+void form_pow_ui(mpz_t res0, mpz_t res1, mpz_t res2, mpz_t a, mpz_t b, mpz_t c, unsigned long long e, unsigned int p0, mpz_t p1, mpz_t L)
 {
-	mpz_t res0, res1, res2, f0, f1, f2;
-	mpz_inits(res0, res1, res2, f0, f1, f2, NULL);
+	mpz_t f0, f1, f2;
+	mpz_inits(f0, f1, f2, NULL);
+
+	// set (res0,res1,res2) to the principal form (1,0,p1)
+
 	mpz_set_ui(res0, 1);
 	mpz_set_ui(res1, p0);
-	mpz_set(res2, p1); //CHANGE TO PRINCIPAL FORM
+	mpz_set(res2, p1);
+	
 	mpz_set(f0, a);
 	mpz_set(f1, b);
 	mpz_set(f2, c);
@@ -409,9 +420,6 @@ void form_pow_ui(mpz_t res0_, mpz_t res1_, mpz_t res2_, mpz_t a, mpz_t b, mpz_t 
 		e >>= 1;
 		NUDPL(f0, f1, f2, f0, f1, f2, L);
 	}
-	mpz_set(res0_, res0);
-	mpz_set(res1_, res1);
-	mpz_set(res2_, res2);
-	mpz_clears(res0, res1, res2, f0, f1, f2, NULL);
+	mpz_clears(f0, f1, f2, NULL);
 	return;
 }

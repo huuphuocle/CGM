@@ -1,11 +1,1 @@
-random k
-Optimize form_pow
-Optimize Miller-Rabin (slower than GMP)
-Change B1 to optimal value
-THE RANDSEED OF GMP IS COSTLY ---> CHANGE IT TO MAIN
-
-WHAT MATTERS THE MOST IS TO CHOOSE A GOOD B1 and B2
-
-FUNCTIONS IN ARITHMETIC.C ARE OK NOW.
-NUDPL IS SLIGHTLY FASTER THAN NUCOMP
-
+How to choose proper value for B1 and B2?

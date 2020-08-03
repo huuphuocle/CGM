@@ -12,10 +12,10 @@ CFLAGS  = -g -Wall
 LIB = -lgmp -lm
 
 # C files
-FILES = main.c cgm.c factor.c form.c arithmetic.c
-FILES_FORM = test_form.c form.c arithmetic.c
+FILES = src/main.c src/cgm.c src/form.c src/auxiliary.c
+FILES_FORM = src/main-form.c src/form.c src/auxiliary.c
 # headers
-HEADERS = cgm.h
+HEADERS = headers/cgm.h
 
 # the build target executable:
 TARGET = cgm
@@ -26,7 +26,7 @@ FORM = test_form
 all: $(FILES) $(HEADERS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(FILES) $(LIB)
 
-form: $(FILES_FORM)
+form-only: $(FILES_FORM)
 	$(CC) $(CFLAGS) -o $(FORM) $(FILES_FORM) $(LIB)
 clean: 
 	rm -f $(TARGET)

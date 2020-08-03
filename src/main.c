@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "cgm.h"
+#include "../headers/cgm.h"
 
 int main(int argc, char * argv[]){
 	if (argc == 1){
